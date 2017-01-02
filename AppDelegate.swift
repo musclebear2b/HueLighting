@@ -12,10 +12,29 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
-
+    var bridges: [AnyHashable: Any]?
+    var defaults = UserDefaults.standard
+    var knownBridges = Array<Any>()
+    var knownBridgesPresent = Array<Any>()
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        let bridgeConfigCache = PHBridgeResourcesReader.readBridgeResourcesCache()
+        for bridge in knownBridges {
+            knownBridges = defaults.array(forKey: "bridgesKnown")!
+            let bridgeConfig = bridgeConfigCache?.bridgeConfiguration
+            let bridgeID = bridgeConfig?.bridgeId
+            if (compareBridgeIDs(id: bridgeID!)) {
+                knownBridgesPresent.append(bridge)
+                print("Known bridge present")
+            }  else  {
+                print("No known bridges present")
+            }
+            
+        }
+       
+        
         return true
     }
 
@@ -42,5 +61,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
 
+    func searchForBridges() -> Bool {
+        var result: Bool = false
+
+        let bridgeSearch = PHBridgeSearching(upnpSearch: true, andPortalSearch: true, andIpAddressSearch: true)
+        bridgeSearch?.startSearch(completionHandler: { (bridgesFound: [AnyHashable : Any]?) in
+            
+            if (bridgesFound?.count)! > 0 {
+                    self.bridges = bridgesFound
+                result =  true
+            }  else  {
+                print("No Bridges Found")
+                result =  false
+            }
+        })
+        return result
+    }
+    
+    func compareBridgeIDs(id: String) -> Bool {
+        var result: Bool = false
+        
+        for _ in knownBridges {
+            let bridgeConfig = PHBridgeResourcesReader.readBridgeResourcesCache()
+            if (bridgeConfig?.bridgeConfiguration.bridgeId == id) {
+                result = true
+            }  else  {
+                result = false
+            }
+        }
+        return result
+    }
+    
 }
 
