@@ -65,11 +65,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 self.searchResult =  false
             }
             print("searchResult = \(self.searchResult)")
-            for (key, value) in bridgesFound! {
-                self.bridges = [("\(key)", "\(value)") as (bridgeID: String, IPAddress: String)]
-            }
-            for (key, value) in self.bridges! {
-                print("\(key): \(value)")
+            if (self.searchResult) {
+                for (key, value) in bridgesFound! {
+                    self.bridges = [("\(key)", "\(value)") as (bridgeID: String, IPAddress: String)]
+                }
+                for (key, value) in self.bridges! {
+                    print("\(key): \(value)")
+                }
             }
         })
     }
