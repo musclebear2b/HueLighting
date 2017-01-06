@@ -12,19 +12,18 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    var bridges: [(bridgeID: String, IPAddress: String)]?
+    var bridgesPresent: [(bridgeID: String, IPAddress: String)] = [(String, String)]()
     var defaults = UserDefaults.standard
-    var knownBridges = Array<Any>()
-    var knownBridgesPresent = Array<Any>()
-    var searchResult: Bool = false
+    var knownBridges: [knownBridge]?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
-       // knownBridges = defaults.array(forKey: "bridgesKnown")!
+        knownBridges = defaults.object(forKey: "bridgesKnown") as? [knownBridge]
+        
         
         searchForBridges()
-       
+        
         
         return true
     }
@@ -57,23 +56,50 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let bridgeSearch = PHBridgeSearching(upnpSearch: true, andPortalSearch: true, andIpAddressSearch: true)
         bridgeSearch?.startSearch(completionHandler: { (bridgesFound: [AnyHashable : Any]?) in
             
+            var searchResult: Bool = false
             if (bridgesFound?.count)! > 0 {
                 print(bridgesFound!)
-                self.searchResult =  true
-            }  else  {
-                print("No Bridges Found")
-                self.searchResult =  false
-            }
-            print("searchResult = \(self.searchResult)")
-            if (self.searchResult) {
+                searchResult =  true
                 for (key, value) in bridgesFound! {
-                    self.bridges = [("\(key)", "\(value)") as (bridgeID: String, IPAddress: String)]
+                    self.bridgesPresent = [("\(key)", "\(value)") as (bridgeID: String, IPAddress: String)]
                 }
-                for (key, value) in self.bridges! {
+                print(self.bridgesPresent.count)
+                if (self.bridgesPresent.count > 0) {
+                    
+                    let knownBridgesPresent = self.compareBridges(knownBridges: self.knownBridges!, foundBridges: self.bridgesPresent)!
+                    
+                    if ((knownBridgesPresent.count) > 0) {
+                        print("\(knownBridgesPresent.count) known bridges found")
+                    }  else  {
+                        print("No known bridges found")
+                    }
+                    
+                }
+
+                for (key, value) in self.bridgesPresent {
                     print("\(key): \(value)")
                 }
+            }  else  {
+                print("No Bridges Found")
+                searchResult =  false
             }
+            print("searchResult = \(searchResult)")
         })
+        
+    }
+    
+    
+    
+    func compareBridges(knownBridges: [knownBridge], foundBridges: [(String, String)]) -> [knownBridge]? {
+        var returnArray: [knownBridge] = Array()
+        for known in knownBridges {
+            for found in foundBridges {
+                if (known.bridgeID == found.0) {
+                    returnArray.append(known)
+                }
+            }
+        }
+        return returnArray
     }
     
 }
