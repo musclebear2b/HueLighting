@@ -17,6 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var bridgesPresent: [Bridge] = []
     let PHHue: PHHueSDK = PHHueSDK()
     let NotificationManager = PHNotificationManager.default()
+    var cache: PHBridgeResourcesCache = PHBridgeResourcesReader.readBridgeResourcesCache()
     
     
     
@@ -104,22 +105,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     // Below here start the updated functions
     
-func searchNetworkForBridges() {
-    let bridgeSearch = PHBridgeSearching(upnpSearch: true, andPortalSearch: true, andIpAddressSearch: true)
-    bridgeSearch?.startSearch(completionHandler: { (bridgesFound: [AnyHashable : Any]?) in
-        if ((bridgesFound?.count)! > 0) {
-            print("\(bridgesFound?.count) Bridge(s) Found:")
-            for bridge in bridgesFound! {
-                let id: String = bridge.key as! String
-                let ip: String = bridge.value as! String
-                let newBridge = Bridge(bridgeID: id, bridgeIPAddress: ip)
-                self.bridgesPresent.append(newBridge)
-                print(newBridge)
+    func searchNetworkForBridges() {
+        let bridgeSearch = PHBridgeSearching(upnpSearch: true, andPortalSearch: true, andIpAddressSearch: true)
+        bridgeSearch?.startSearch(completionHandler: { (bridgesFound: [AnyHashable : Any]?) in
+            if ((bridgesFound?.count)! > 0) {
+                print("\(bridgesFound?.count) Bridge(s) Found:")
+                for bridge in bridgesFound! {
+                    let id: String = bridge.key as! String
+                    let ip: String = bridge.value as! String
+                    let newBridge = Bridge(bridgeID: id, bridgeIPAddress: ip)
+                    self.bridgesPresent.append(newBridge)
+                    print(newBridge)
+                }
+            }  else  {
+                print("No Bridges Found!")
             }
-        }  else  {
-            print("No Bridges Found!")
-        }
-    })
+        })
     }
     
     func arePresentBridgesKnownBridges(bridgesPresent: [Bridge], bridgesKnown: [KnownBridge]) -> [KnownBridge] {
@@ -157,7 +158,7 @@ func searchNetworkForBridges() {
     }
     
     func connectToBridge() {
-        NotificationManager?.register(self, with: #selector(localConection), forNotification: LOCAL_CONNECTION_NOTIFICATION)
+        NotificationManager?.register(self, with: #selector(localConnection), forNotification: LOCAL_CONNECTION_NOTIFICATION)
         
         NotificationManager?.register(self, with: #selector(noLocalConnection), forNotification: NO_LOCAL_CONNECTION_NOTIFICATION)
         
@@ -217,10 +218,12 @@ func searchNetworkForBridges() {
     func localConnection() {
         // if connection succesful, this will be called every hearbeat interval
         // update UI to show connected state and cached data
+        print("Pulse...")
     }
     
     func notAuthenticated() {
         // This app is not authenticated with the selected bridge.  Start the authentication/pushlink process
+        print("You have not yet authorised this app with this bridge.  Commencing Authorisation procedure...")
     }
     
     
