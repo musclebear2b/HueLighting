@@ -8,32 +8,12 @@
 
 import UIKit
 
-class knownBridge: NSObject {
-    private var _bridgeID: String!
-    private var _bridgeIPAddress: String!
+class KnownBridge: Bridge {
     private var _bridgeConnectionUserName: String!
     
     init(bridgeID: String, bridgeIPAddress: String, userName: String) {
-        self._bridgeID = bridgeID
-        self._bridgeIPAddress = bridgeIPAddress
+        super.init(bridgeID: bridgeID, bridgeIPAddress: bridgeIPAddress)
         self._bridgeConnectionUserName = userName
-    }
-    
-    var bridgeID: String {
-        get {
-            return self._bridgeID
-        }
-    }
-    
-    var bridgeIPAddress: String {
-        get {
-            return self._bridgeIPAddress
-        }
-        set {
-            if (isValidIPAddress(input: newValue)) {
-                self._bridgeIPAddress = newValue
-            }
-        }
     }
     
     var bridgeConnectionUserName: String {
@@ -53,8 +33,8 @@ class knownBridge: NSObject {
             isValid = false
         }
         
-        return isValid
         
+        return isValid
     }
 
 }
